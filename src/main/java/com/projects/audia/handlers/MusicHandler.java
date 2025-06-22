@@ -41,12 +41,11 @@ public class MusicHandler {
 			}
 		} catch (IOException | InterruptedException e) {
 			messageChannel.sendMessage("Couldn't connect to " + audioChannel.getName() + EmojiConstants.EMOJI_SAD_FACE).queue();
-			System.out.println(e.getMessage());
+			log.error(e.getMessage());
 		}
 	}
 
 	public void handleStopMusicRequest(MessageChannel messageChannel, AudioChannel audioChannel) {
-		System.out.println("Entered handle music request");
 		Guild guild = audioChannel.getGuild();
 		PlayerManager playerManager = PlayerManager.getInstance();
 		GuildMusicManager musicManager = playerManager.getGuildMusicManager(guild);
@@ -119,21 +118,31 @@ public class MusicHandler {
 
 			@Override
 			public void noMatches() {
-				System.err.println("No matches found for: " + path);
+				log.error("No matches found for: " + path);
 			}
 
 			@Override
 			public void loadFailed(FriendlyException exception) {
-				System.out.println("Exception loading:" + exception.getMessage());
+				log.error("Exception loading:" + exception.getMessage());
 			}
 		});
 		return true;
 	}
 
+	/**
+	 * To skip currently playing song
+	 * @param guild
+	 * @param messageChannel
+	 */
 	public void handleSkipMusicRequest(Guild guild, MessageChannel messageChannel) {
 		GuildMusicManager musicManager = PlayerManager.getInstance().getGuildMusicManager(guild);
-		AudioTrack nextTrack = musicManager.scheduler.getQueue().peek();
+		AudioTrack nextTrack = musicManager.scheduler.getQueue().poll();
 		musicManager.player.stopTrack();
-		messageChannel.sendMessage("⏭️ Skipped to: " + (nextTrack != null ? nextTrack.getInfo().title : "End of queue")).queue();
+		if(nextTrack == null){
+			messageChannel.sendMessage("End of queue!"+ EmojiConstants.EMOJI_STOP_SIGN).queue();
+		}else {
+			musicManager.player.startTrack(nextTrack, true);
+			messageChannel.sendMessage("Skipping to next!"+ EmojiConstants.EMOJI_FORWARD).queue();
+		}
 	}
 }

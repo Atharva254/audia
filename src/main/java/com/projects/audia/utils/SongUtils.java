@@ -2,6 +2,7 @@ package com.projects.audia.utils;
 
 import com.projects.audia.config.LocalSongsConfig;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.similarity.JaroWinklerSimilarity;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class SongUtils {
 
 	private final LocalSongsConfig localSongsConfig;
@@ -30,7 +32,7 @@ public class SongUtils {
 	public String searchSongInLocalDir(String songName) {
 		File dir = new File(localSongsConfig.getSongsDirectory());
 		if (!dir.exists() || !dir.isDirectory()) {
-			System.err.println("Invalid directory: " + localSongsConfig.getSongsDirectory());
+			log.error("Invalid directory: " + localSongsConfig.getSongsDirectory());
 			return null;
 		}
 
@@ -46,7 +48,7 @@ public class SongUtils {
 				return file.getAbsolutePath();
 			}
 
-			System.out.println("Score for: "+ fileNameWithoutExt + " : " + score);
+			log.info("Score for: "+ fileNameWithoutExt + " : " + score);
 			scoreMap.put(file, score);
 		}
 
@@ -57,11 +59,12 @@ public class SongUtils {
 			double score = bestMatch.get().getValue();
 
 			if (score >= THRESHOLD) {
-				System.out.println("Matched: " + bestFile.getName() + " with score " + score);
+				log.info("Matched: " + bestFile.getName() + " with score " + score);
 				return bestFile.getAbsolutePath();
 			}
 		}
 
+		log.error("No match found in local directory for " +songName);
 		return null;
 	}
 

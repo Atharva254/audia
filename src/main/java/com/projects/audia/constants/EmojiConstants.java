@@ -9,4 +9,6 @@ public class EmojiConstants {
 	public static final String EMOJI_HANDS_ON_HEAD = "\uD83D\uDE46\u200D♂\uFE0F";
 	public static final String EMOJI_SKULL = "\uD83D\uDC80";
 	public static final String EMOJI_MALE_FACEPALM = "\uD83E\uDD26\u200D♂\uFE0F";
+	public static final String EMOJI_FORWARD = "\uFE0F";
+	public static final String EMOJI_STOP_SIGN = "\uD83D\uDED1";
 }
