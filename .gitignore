@@ -4,7 +4,12 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-!Songs
+
+# Songs directory
+Songs/
+
+# yt-dlp #
+yt-dlp.exe
 
 ### STS ###
 .apt_generated
