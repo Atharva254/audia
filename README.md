@@ -1,5 +1,5 @@
-# audia
-A discord music bot
+# Audia
+**A discord music bot**
 
 ## Features
 * Easy to set up
