@@ -5,9 +5,6 @@ import com.projects.audia.components.GuildMusicManager;
 import com.projects.audia.components.PlayerManager;
 import com.projects.audia.constants.EmojiConstants;
 import com.projects.audia.utils.SongUtils;
-import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
-import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
-import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +32,7 @@ public class MusicHandler {
 	 */
 	public void handlePlayMusicRequest(MessageChannel messageChannel, AudioChannel audioChannel, String songName) {
 		try {
-			boolean songPlayed = findAndPlaySong(messageChannel, audioChannel, songName);
-			if (songPlayed) {
-				messageChannel.sendMessage("Playing " + songName + " in " + audioChannel.getName() + EmojiConstants.EMOJI_SUNGLASSES).queue();
-			}
+			findAndPlaySong(messageChannel, audioChannel, songName);
 		} catch (IOException | InterruptedException e) {
 			messageChannel.sendMessage("Couldn't connect to " + audioChannel.getName() + EmojiConstants.EMOJI_SAD_FACE).queue();
 			log.error(e.getMessage());
@@ -80,11 +74,10 @@ public class MusicHandler {
 	 * @param messageChannel message channel
 	 * @param audioChannel   audio channel to play the song in
 	 * @param songName       name of the song
-	 * @return boolean describing success or failure in playing the song
-	 * @throws IOException
-	 * @throws InterruptedException
+	 * @throws IOException IO exception
+	 * @throws InterruptedException Interrupt exception
 	 */
-	private boolean findAndPlaySong(MessageChannel messageChannel, AudioChannel audioChannel, String songName) throws IOException, InterruptedException {
+	private void findAndPlaySong(MessageChannel messageChannel, AudioChannel audioChannel, String songName) throws IOException, InterruptedException {
 		//Searching song in local directory first
 		String path = songUtils.searchSongInLocalDir(songName);
 
@@ -100,39 +93,16 @@ public class MusicHandler {
 
 		log.info("Song search source:" + searchSource);
 
-		playerManager.getPlayerManager().loadItem(searchSource, new AudioLoadResultHandler() {
-			@Override
-			public void trackLoaded(AudioTrack track) {
-				musicManager.scheduler.queue(track);
-			}
-
-			@Override
-			public void playlistLoaded(AudioPlaylist playlist) {
-				AudioTrack firstTrack = playlist.getSelectedTrack() != null
-						? playlist.getSelectedTrack()
-						: playlist.getTracks().getFirst();
-
-				musicManager.scheduler.queue(firstTrack);
-				messageChannel.sendMessage("Queued from playlist: **" + firstTrack.getInfo().title + "**").queue();
-			}
-
-			@Override
-			public void noMatches() {
-				log.error("No matches found for: " + path);
-			}
-
-			@Override
-			public void loadFailed(FriendlyException exception) {
-				log.error("Exception loading:" + exception.getMessage());
-			}
-		});
-		return true;
+		playerManager
+				.getPlayerManager()
+				.loadItem(searchSource,
+						new AudioResultHandler(musicManager, messageChannel, searchSource, songName));
 	}
 
 	/**
 	 * To skip currently playing song
-	 * @param guild
-	 * @param messageChannel
+	 * @param guild guild
+	 * @param messageChannel the text channel that the message was sent in
 	 */
 	public void handleSkipMusicRequest(Guild guild, MessageChannel messageChannel) {
 		GuildMusicManager musicManager = PlayerManager.getInstance().getGuildMusicManager(guild);

@@ -1,4 +1,4 @@
-package com.projects.audia.components;
+package com.projects.audia.listeners;
 
 
 import com.projects.audia.config.CommandConfig;
@@ -45,6 +45,9 @@ public class MessageListener extends ListenerAdapter {
 			}
 			Guild guild = audioChannel.getGuild();
 			if (input.startsWith(commandConfig.getPlayMusicCommand())) {
+				if (input.trim().equals(commandConfig.getPlayMusicCommand())) {
+					messageChannel.sendMessage("Play what?" + EmojiConstants.EMOJI_EYEBROW_RAISE).queue();
+				}
 				String songName = input.substring(commandConfig.getPlayMusicCommand().length() + 1);
 				musicHandler.handlePlayMusicRequest(messageChannel, audioChannel, songName);
 			} else if (input.equalsIgnoreCase(commandConfig.getStopMusicCommand())) {
