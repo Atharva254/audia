@@ -11,12 +11,15 @@ import java.io.File;
 @Configuration
 @Getter
 @Slf4j
-public class LocalSongsConfig {
+public class SongsConfig {
 	@Value("${songs.directory:Songs}")
 	private String songsDirectory;
 
 	@Value("${local.search.similarity.threshold:0.85}")
 	private double localSearchSimilarityThreshold;
+
+	@Value("${yt-dlp.path}")
+	private String ytDlpPath;
 
 	@PostConstruct
 	private void initDir(){
