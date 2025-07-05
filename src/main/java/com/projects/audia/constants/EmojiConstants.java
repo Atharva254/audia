@@ -13,4 +13,6 @@ public class EmojiConstants {
 	public static final String EMOJI_STOP_SIGN = "\uD83D\uDED1";
 	public static final String EMOJI_EYEBROW_RAISE = "\uD83E\uDD28";
 	public static final String EMOJI_MUSIC_SIGN = "\uD83C\uDFB5";
+	public static final String EMOJI_FOCUS = "\uD83E\uDDD0";
+	public static final String EMOJI_SLEEPY_FACE = "\uD83D\uDE2A";
 }

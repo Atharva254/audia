@@ -81,6 +81,19 @@ public class MusicHandler {
 		//Searching song in local directory first
 		String path = songUtils.searchSongInLocalDir(songName);
 
+		if(path == null){
+			//Couldn't find song in local dir. Downloading it
+			messageChannel.sendMessage("Hold up!" + EmojiConstants.EMOJI_RAISED_HAND + "Searching it" + EmojiConstants.EMOJI_FOCUS + "....").queue();
+			boolean success = songUtils.downloadSong(songName);
+			if(success){
+				messageChannel.sendMessage("....saved!").queue();
+				path = songUtils.searchSongInLocalDir(songName);
+			}else {
+				messageChannel.sendMessage("Couldn't find this one" + EmojiConstants.EMOJI_SLEEPY_FACE).queue();
+				return;
+			}
+		}
+
 		Guild guild = audioChannel.getGuild();
 		AudioManager audioManager = guild.getAudioManager();
 		audioManager.openAudioConnection(audioChannel);
@@ -89,14 +102,12 @@ public class MusicHandler {
 		PlayerManager playerManager = PlayerManager.getInstance();
 		GuildMusicManager musicManager = playerManager.getGuildMusicManager(guild);
 
-		String searchSource = (path != null) ? path : "ytsearch:" + songName;
-
-		log.info("Song search source:" + searchSource);
+		log.info("Song search source:" + songName);
 
 		playerManager
 				.getPlayerManager()
-				.loadItem(searchSource,
-						new AudioResultHandler(musicManager, messageChannel, searchSource, songName));
+				.loadItem(path,
+						new AudioResultHandler(musicManager, messageChannel, songName));
 	}
 
 	/**
