@@ -15,4 +15,7 @@ public class EmojiConstants {
 	public static final String EMOJI_MUSIC_SIGN = "\uD83C\uDFB5";
 	public static final String EMOJI_FOCUS = "\uD83E\uDDD0";
 	public static final String EMOJI_SLEEPY_FACE = "\uD83D\uDE2A";
+	public static final String EMOJI_LOVE = "\uD83E\uDD70";
+	public static final String EMOJI_BYE = "\uD83D\uDC4B";
+	public static final String EMOJI_CROSS_EYES = "\uD83D\uDE35";
 }

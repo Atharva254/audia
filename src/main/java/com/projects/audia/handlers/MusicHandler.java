@@ -4,6 +4,7 @@ package com.projects.audia.handlers;
 import com.projects.audia.components.GuildMusicManager;
 import com.projects.audia.components.PlayerManager;
 import com.projects.audia.constants.EmojiConstants;
+import com.projects.audia.utils.GenericUtils;
 import com.projects.audia.utils.SongUtils;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 
@@ -62,7 +64,7 @@ public class MusicHandler {
 		AudioManager audioManager = guild.getAudioManager();
 		if (audioManager.isConnected()) {
 			audioManager.closeAudioConnection();
-			messageChannel.sendMessage("Bye bye" + EmojiConstants.EMOJI_SALUTE).queue();
+			messageChannel.sendMessage("Tatataaa" + EmojiConstants.EMOJI_BYE + "🥰").queue();
 		} else {
 			messageChannel.sendMessage("I'm literally not even connected " + EmojiConstants.EMOJI_HANDS_ON_HEAD).queue();
 		}
@@ -73,25 +75,38 @@ public class MusicHandler {
 	 *
 	 * @param messageChannel message channel
 	 * @param audioChannel   audio channel to play the song in
-	 * @param songName       name of the song
-	 * @throws IOException IO exception
+	 * @param searchTerm     name of the song
+	 * @throws IOException          IO exception
 	 * @throws InterruptedException Interrupt exception
 	 */
-	private void findAndPlaySong(MessageChannel messageChannel, AudioChannel audioChannel, String songName) throws IOException, InterruptedException {
-		//Searching song in local directory first
-		String path = songUtils.searchSongInLocalDir(songName);
+	private void findAndPlaySong(MessageChannel messageChannel, AudioChannel audioChannel, String searchTerm) throws IOException, InterruptedException {
+		String path;
+		String songName = GenericUtils.isUrlFormat(searchTerm) ? songUtils.fetchSongTitleFromYoutube(searchTerm, true) : songUtils.fetchSongTitleFromYoutube(searchTerm, false);
 
-		if(path == null){
-			//Couldn't find song in local dir. Downloading it
-			messageChannel.sendMessage("Hold up!" + EmojiConstants.EMOJI_RAISED_HAND + "Searching it" + EmojiConstants.EMOJI_FOCUS + "....").queue();
-			boolean success = songUtils.downloadSong(songName);
-			if(success){
-				messageChannel.sendMessage("....saved!").queue();
-				path = songUtils.searchSongInLocalDir(songName);
-			}else {
-				messageChannel.sendMessage("Couldn't find this one" + EmojiConstants.EMOJI_SLEEPY_FACE).queue();
+		if (!StringUtils.hasText(songName)) {
+			//Couldn't find URL
+			messageChannel.sendMessage("Couldn't find the song" + EmojiConstants.EMOJI_SAD_FACE).queue();
+			return;
+		}
+
+		path = songUtils.searchSongInLocalDir(songName);
+
+		if (path == null) {
+			messageChannel.sendMessage("Hold up!" + EmojiConstants.EMOJI_RAISED_HAND + "Getting it" + EmojiConstants.EMOJI_FOCUS + "....").queue();
+			String savedFileName = songUtils.downloadSong(songName, false);
+
+			if (!StringUtils.hasText(savedFileName)) {
+				messageChannel.sendMessage("Something went wrong" + EmojiConstants.EMOJI_CROSS_EYES).queue();
 				return;
+			} else {
+				messageChannel.sendMessage("....saved!").queue();
+				path = songUtils.searchSongInLocalDir(savedFileName);
 			}
+		}
+
+		if (path == null) {
+			messageChannel.sendMessage("Couldn't find this one" + EmojiConstants.EMOJI_SLEEPY_FACE).queue();
+			return;
 		}
 
 		Guild guild = audioChannel.getGuild();
@@ -102,28 +117,28 @@ public class MusicHandler {
 		PlayerManager playerManager = PlayerManager.getInstance();
 		GuildMusicManager musicManager = playerManager.getGuildMusicManager(guild);
 
-		log.info("Song search source:" + songName);
+		log.info("Song search source:" + searchTerm);
 
-		playerManager
-				.getPlayerManager()
-				.loadItem(path,
-						new AudioResultHandler(musicManager, messageChannel, songName));
+		playerManager.getPlayerManager().
+
+				loadItem(path, new AudioResultHandler(musicManager, messageChannel, songName));
 	}
 
 	/**
 	 * To skip currently playing song
-	 * @param guild guild
+	 *
+	 * @param guild          guild
 	 * @param messageChannel the text channel that the message was sent in
 	 */
 	public void handleSkipMusicRequest(Guild guild, MessageChannel messageChannel) {
 		GuildMusicManager musicManager = PlayerManager.getInstance().getGuildMusicManager(guild);
 		AudioTrack nextTrack = musicManager.scheduler.getQueue().poll();
 		musicManager.player.stopTrack();
-		if(nextTrack == null){
-			messageChannel.sendMessage("End of queue!"+ EmojiConstants.EMOJI_STOP_SIGN).queue();
-		}else {
+		if (nextTrack == null) {
+			messageChannel.sendMessage("End of queue!" + EmojiConstants.EMOJI_STOP_SIGN).queue();
+		} else {
 			musicManager.player.startTrack(nextTrack, true);
-			messageChannel.sendMessage("Skipping to next!"+ EmojiConstants.EMOJI_FORWARD).queue();
+			messageChannel.sendMessage("Skipping to next!" + EmojiConstants.EMOJI_FORWARD).queue();
 		}
 	}
 }

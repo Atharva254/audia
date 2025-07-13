@@ -22,15 +22,15 @@ public class SongsConfig {
 	private String ytDlpPath;
 
 	@PostConstruct
-	private void initDir(){
+	private void initDir() {
 		File dir = new File(songsDirectory);
-		if(!dir.exists() || !dir.isDirectory()){
+		if (!dir.exists() || !dir.isDirectory()) {
 			log.info("Configured songs directory not found. Creating it.");
 			boolean mkdir = dir.mkdir();
 
-			if(mkdir){
-			log.info("Created songs directory at configured path");
-			}else {
+			if (mkdir) {
+				log.info("Created songs directory at configured path");
+			} else {
 				log.warn("Couldn't create Songs directory at specified path. Check permissions and try again.");
 			}
 		}

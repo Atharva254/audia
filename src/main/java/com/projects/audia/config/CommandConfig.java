@@ -13,12 +13,10 @@ import java.util.Set;
 @ConfigurationProperties(prefix = "command")
 @Getter
 public class CommandConfig {
-	@Value("${prefix:!}")
-	private String prefix;
-
 	@Getter
 	private final Set<String> musicCommands = new HashSet<>();
-
+	@Value("${prefix:!}")
+	private String prefix;
 	@Value("${play.music:play}")
 	private String playMusicCommand;
 

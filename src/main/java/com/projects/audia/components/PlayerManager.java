@@ -23,6 +23,13 @@ public class PlayerManager {
 		AudioSourceManagers.registerLocalSource(playerManager);
 	}
 
+	public static synchronized PlayerManager getInstance() {
+		if (INSTANCE == null) {
+			INSTANCE = new PlayerManager();
+		}
+		return INSTANCE;
+	}
+
 	public synchronized GuildMusicManager getGuildMusicManager(Guild guild) {
 		long guildId = guild.getIdLong();
 		GuildMusicManager musicManager = musicManagers.get(guildId);
@@ -35,13 +42,6 @@ public class PlayerManager {
 		guild.getAudioManager().setSendingHandler(musicManager.getSendHandler());
 
 		return musicManager;
-	}
-
-	public static synchronized PlayerManager getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new PlayerManager();
-		}
-		return INSTANCE;
 	}
 }
 

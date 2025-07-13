@@ -20,7 +20,7 @@ public class JdaConfig {
 	private String devToken;
 
 	@Bean
-	JDA initializeJda(MessageListener messageListener){
+	JDA initializeJda(MessageListener messageListener) {
 		EnumSet<GatewayIntent> intents = EnumSet.of(
 				// We need messages in guilds to accept commands from users
 				GatewayIntent.GUILD_MESSAGES,
@@ -29,7 +29,7 @@ public class JdaConfig {
 				// Enable access to message.getContentRaw()
 				GatewayIntent.MESSAGE_CONTENT,
 				// Enable emojis
-				GatewayIntent.GUILD_EXPRESSIONS,GatewayIntent.SCHEDULED_EVENTS
+				GatewayIntent.GUILD_EXPRESSIONS, GatewayIntent.SCHEDULED_EVENTS
 		);
 
 		return JDABuilder
